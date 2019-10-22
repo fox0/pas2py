@@ -22,7 +22,7 @@ statements:
     statement (SEMI statement)*;
 
 statement:
-    callFunction | assignmentStatement;
+    block | callFunction | assignmentStatement | if_;
 
 callFunction:
     ID LPAREN parameterList RPAREN;
@@ -40,9 +40,10 @@ factor:
     ID | CONST_INT | LPAREN expression RPAREN;
 
 operator:
-    PLUS| MINUS | STAR | SLASH | 'div' | 'mod';
+    PLUS | MINUS | STAR | SLASH | 'div' | 'mod';  //todo + <=
 
-
+if_:
+    'if' expression statement 'else' statement SEMI;
 
 
 ID: [a-zA-Z][a-zA-Z0-9_]*;
