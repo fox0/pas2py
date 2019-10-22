@@ -1,5 +1,5 @@
-*.interp
-*.tokens
-/HelloLexer.py
-/HelloListener.py
-/HelloParser.py
+/*.interp
+/*.tokens
+/Pascal*.py
+
+ppp.g4

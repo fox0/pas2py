@@ -1,24 +1,34 @@
-from antlr4 import StdinStream, CommonTokenStream, ParseTreeWalker
+from antlr4.FileStream import FileStream
+from antlr4.CommonTokenStream import CommonTokenStream
+from antlr4.tree.Tree import ParseTreeWalker
 
-from HelloLexer import HelloLexer
-from HelloListener import HelloListener
-from HelloParser import HelloParser
-
-
-class HelloPrintListener(HelloListener):
-    def enterHi(self, ctx):
-        print("Hello: %s" % ctx.ID())
+from PascalLexer import PascalLexer
+from PascalListener import PascalListener
+from PascalParser import PascalParser
 
 
-def main():
-    lexer = HelloLexer(StdinStream())
+class Listener(PascalListener):
+    def __init__(self):
+        self.var_ls = {}
+
+    def exitVariableDeclaration(self, ctx):
+        # identifierList COLON ('integer' | 'int64');
+        # ctx.children[2]
+        for i in ctx.children[0].children[::2]:
+            self.var_ls[str(i)] = 'int'
+        print('#', self.var_ls)
+
+
+def main(filename):
+    lexer = PascalLexer(FileStream(filename))
     stream = CommonTokenStream(lexer)
-    parser = HelloParser(stream)
-    tree = parser.hi()
-    printer = HelloPrintListener()
+    parser = PascalParser(stream)
+    tree = parser.program()
+    listener = Listener()
     walker = ParseTreeWalker()
-    walker.walk(printer, tree)
+    walker.walk(listener, tree)
 
 
 if __name__ == '__main__':
-    main()
+    # todo replace '\bVAR\b' -> 'var'
+    main('test1.pas')
