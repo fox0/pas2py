@@ -1,15 +1,30 @@
 grammar Pascal;
 
 program:
-    variableDeclarationPart;
+    variableDeclarationPart block DOT;
 
 variableDeclarationPart:
     'var' variableDeclaration (SEMI variableDeclaration)* SEMI;
 
 variableDeclaration:
-    identifierList COLON ('integer' | 'int64');
+    identifierList COLON varType;
 
 identifierList:
+    ID (COMMA ID)*;
+
+varType:
+    ('integer' | 'int64');
+
+block:
+    'begin'
+    callFunction SEMI //todo
+    'end'
+    ;
+
+callFunction:
+    ID LPAREN parameterList RPAREN;
+
+parameterList:
     ID (COMMA ID)*;
 
 
@@ -19,3 +34,6 @@ WS: [ \t\r\n]+ -> skip;
 SEMI: ';';
 COLON: ':';
 COMMA: ',';
+DOT: '.';
+LPAREN: '(';
+RPAREN: ')';

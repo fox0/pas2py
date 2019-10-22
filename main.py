@@ -10,13 +10,26 @@ from PascalParser import PascalParser
 class Listener(PascalListener):
     def __init__(self):
         self.var_ls = {}
+        self.spaces = 0
 
-    def exitVariableDeclaration(self, ctx):
-        # identifierList COLON ('integer' | 'int64');
-        # ctx.children[2]
-        for i in ctx.children[0].children[::2]:
+    def exitVariableDeclaration(self, ctx: PascalParser.VariableDeclarationContext):
+        # var_type = ctx.varType()
+        for i in ctx.identifierList().children[::2]:  # todo replace children
             self.var_ls[str(i)] = 'int'
-        print('#', self.var_ls)
+        print(' ' * self.spaces, '# ', self.var_ls, sep='')
+
+    def exitCallFunction(self, ctx: PascalParser.CallFunctionContext):
+        func = str(ctx.ID())
+        if func == 'readln':
+            for i in ctx.parameterList().children[::2]:
+                var = str(i)
+                var_type = self.var_ls[var]
+                if var_type == 'int':
+                    print(' ' * self.spaces, '%s = int(input())' % var, sep='')
+                else:
+                    raise NotImplementedError(var_type)
+        else:
+            raise NotImplementedError(func)
 
 
 def main(filename):

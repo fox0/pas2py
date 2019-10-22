@@ -2,7 +2,7 @@ var
   k, t : int64;
 
 begin
-  Readln(k, t);
+  readln(k, t);
   t := t mod (2 * k);
   if t <= k then
     writeln(t)
