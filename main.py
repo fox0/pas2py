@@ -31,6 +31,11 @@ class Listener(PascalListener):
         else:
             raise NotImplementedError(func)
 
+    def exitAssignmentStatement(self, ctx:PascalParser.AssignmentStatementContext):
+        var = ctx.ID()
+        ls = ctx.expression()  # todo
+        print(' ' * self.spaces, '%s = %s' % (var, ls), sep='')
+
 
 def main(filename):
     lexer = PascalLexer(FileStream(filename))
