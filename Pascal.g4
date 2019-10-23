@@ -26,7 +26,6 @@ statement:
     | readln
     | writeln
     | block
-    //| callFunction
     | assignmentStatement
     | ifStatement
     ;
@@ -51,7 +50,13 @@ operators:
     EQUAL | NOT_EQUAL | LT | LE | GE | GT | DIV | MOD | PLUS | MINUS | STAR | SLASH;
 
 ifStatement:
-    'if' expression 'then' statement ('else' statement)*;
+    'if' expression 'then' (block|ifBody) elseStatement*;
+
+ifBody:
+    statements;
+
+elseStatement:
+    'else' statements;
 
 
 ID: [a-zA-Z][a-zA-Z0-9_]*;

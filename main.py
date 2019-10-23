@@ -1,4 +1,5 @@
 import re
+import sys
 
 from antlr4.InputStream import InputStream
 from antlr4.CommonTokenStream import CommonTokenStream
@@ -7,6 +8,10 @@ from antlr4.tree.Tree import ParseTreeWalker
 from PascalLexer import PascalLexer
 from PascalListener import PascalListener
 from PascalParser import PascalParser
+
+KEYWORDS = (
+    'var', 'begin', 'end', 'readln', 'writeln', 'mod', 'div', 'if', 'then', 'else', 'while', 'do', 'integer', 'int64',
+)
 
 
 class Listener(PascalListener):
@@ -42,6 +47,21 @@ class Listener(PascalListener):
         expr = ctx.expression().getText()
         self._print('{var} = {expr}'.format(var=var, expr=expr))
 
+    def enterIfStatement(self, ctx: PascalParser.IfStatementContext):
+        self._print('if {}:'.format(ctx.expression().getText()))
+        self.spaces += 4
+
+    def exitIfStatement(self, ctx: PascalParser.IfStatementContext):
+        self.spaces -= 4
+
+    def enterElseStatement(self, ctx: PascalParser.ElseStatementContext):
+        self.spaces -= 4
+        self._print('else:')
+        self.spaces += 4
+
+    def exitElseStatement(self, ctx: PascalParser.ElseStatementContext):
+        self.spaces -= 4
+
     def _print_input(self, var, const=None):
         const = const or ''
         var_type = self._get_var_type(var)
@@ -67,8 +87,7 @@ class Listener(PascalListener):
 def main(filename):
     with open(filename) as f:
         text = f.read()
-    text = re.sub(r'\b(var|begin|end|readln|writeln|mod|div|if|then|else|while|do|integer)\b',
-                  lambda m: m.group().lower(), text, flags=re.IGNORECASE)
+    text = re.sub(r'\b({})\b'.format(r'|'.join(KEYWORDS)), lambda m: m.group().lower(), text, flags=re.IGNORECASE)
     text = text.replace('div', '//').replace('mod', '%')
 
     lexer = PascalLexer(InputStream(text))
@@ -81,4 +100,7 @@ def main(filename):
 
 
 if __name__ == '__main__':
-    main('test1.pas')
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main('test1.pas')
