@@ -22,33 +22,37 @@ statements:
     statement (SEMI statement)*;
 
 statement:
-    block | callFunction | assignmentStatement | if_;
+      writelnReadln
+    | block
+    //| callFunction
+    | assignmentStatement
+    | ifStatement
+    ;
 
-callFunction:
-    ID LPAREN parameterList RPAREN;
-
-parameterList:
-    ID (COMMA ID)*;
+writelnReadln:
+    'writeln' LPAREN CONST_STR RPAREN SEMI
+    'readln' LPAREN ID RPAREN;
 
 assignmentStatement:
     ID ASSIGN expression;
 
 expression:
-    factor (operator expression)?;
+    (LPAREN expression RPAREN | CONST_INT | ID) (operators expression)*;
 
-factor:
-    ID | CONST_INT | LPAREN expression RPAREN;
+operators:
+    EQUAL | NOT_EQUAL | LT | LE | GE | GT | DIV | PLUS | MINUS | STAR | SLASH;
 
-operator:
-    PLUS | MINUS | STAR | SLASH | 'div' | 'mod';  //todo + <=
-
-if_:
-    'if' expression statement 'else' statement SEMI;
+ifStatement:
+    'if' expression 'then' statement ('else' statement)*;
 
 
 ID: [a-zA-Z][a-zA-Z0-9_]*;
 CONST_INT: [0-9]+;
+CONST_STR: '\'' ('\'\'' | ~ ('\''))* '\'';
+
 WS: [ \t\r\n]+ -> skip;
+COMMENT1: '(*' .*? '*)' -> skip;
+COMMENT2: '{' .*? '}' -> skip;
 
 SEMI: ';';
 COLON: ':';
@@ -56,8 +60,17 @@ COMMA: ',';
 DOT: '.';
 LPAREN: '(';
 RPAREN: ')';
+ASSIGN: ':=';
+
+EQUAL: '=';
+NOT_EQUAL: '<>';
+LT: '<';
+LE: '<=';
+GE: '>=';
+GT: '>';
+
+DIV: '//';
 PLUS: '+';
 MINUS: '-';
 STAR: '*';
 SLASH: '/';
-ASSIGN: ':=';
