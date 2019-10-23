@@ -16,7 +16,7 @@ varType:
     ('integer' | 'int64');
 
 block:
-    'begin' statements SEMI 'end';
+    'begin' statements SEMI? 'end';
 
 statements:
     statement (SEMI statement)*;
@@ -47,25 +47,16 @@ expression:
     (LPAREN expression RPAREN | CONST_INT | ID) (operators expression)*;
 
 operators:
-    EQUAL | NOT_EQUAL | LT | LE | GE | GT | DIV | MOD | PLUS | MINUS | STAR | SLASH;
+    EQUAL | NOT_EQUAL | LT | LE | GE | GT | OR | AND | DIV | MOD | PLUS | MINUS | STAR | SLASH;
 
 ifStatement:
-    'if' expression 'then' (block|ifBody) elseStatement*;
-
-ifBody:
-    statements;
+    'if' expression 'then' (block|blockBody) elseStatement*;
 
 elseStatement:
-    'else' statements;
+    'else' (block|blockBody);
 
-
-ID: [a-zA-Z][a-zA-Z0-9_]*;
-CONST_INT: [0-9]+;
-CONST_STR: '\'' ('\'\'' | ~ ('\''))* '\'';
-
-WS: [ \t\r\n]+ -> skip;
-COMMENT1: '(*' .*? '*)' -> skip;
-COMMENT2: '{' .*? '}' -> skip;
+blockBody:
+    statements;
 
 SEMI: ';';
 COLON: ':';
@@ -81,6 +72,8 @@ LT: '<';
 LE: '<=';
 GE: '>=';
 GT: '>';
+OR: 'or';
+AND: 'and';
 
 PLUS: '+';
 MINUS: '-';
@@ -89,3 +82,10 @@ SLASH: '/';
 
 DIV: '//';
 MOD: '%';
+
+ID: [a-zA-Z][a-zA-Z0-9_]*;
+CONST_INT: [0-9]+;
+CONST_STR: '\'' ('\'\'' | ~ ('\''))* '\'';
+WS: [ \t\r\n]+ -> skip;
+COMMENT1: '(*' .*? '*)' -> skip;
+COMMENT2: '{' .*? '}' -> skip;

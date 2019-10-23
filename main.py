@@ -10,7 +10,11 @@ from PascalListener import PascalListener
 from PascalParser import PascalParser
 
 KEYWORDS = (
-    'var', 'begin', 'end', 'readln', 'writeln', 'mod', 'div', 'if', 'then', 'else', 'while', 'do', 'integer', 'int64',
+    'var', 'integer', 'int64',
+    'begin', 'end',
+    'readln', 'writeln',
+    'mod', 'div', 'or', 'and',
+    'if', 'then', 'else', 'while', 'do',
 )
 
 
@@ -23,12 +27,6 @@ class Listener(PascalListener):
         var_type = ctx.varType().getText()
         for i in ctx.identifierList().getText().split(','):
             self.var_ls[i] = var_type
-
-    def enterBlock(self, ctx: PascalParser.BlockContext):
-        self.spaces += 4
-
-    def exitBlock(self, ctx: PascalParser.BlockContext):
-        self.spaces -= 4
 
     def exitWritelnReadln(self, ctx: PascalParser.WritelnReadlnContext):
         var = ctx.ID().getText()
@@ -49,17 +47,20 @@ class Listener(PascalListener):
 
     def enterIfStatement(self, ctx: PascalParser.IfStatementContext):
         self._print('if {}:'.format(ctx.expression().getText()))
-        self.spaces += 4
-
-    def exitIfStatement(self, ctx: PascalParser.IfStatementContext):
-        self.spaces -= 4
 
     def enterElseStatement(self, ctx: PascalParser.ElseStatementContext):
-        self.spaces -= 4
         self._print('else:')
+
+    def enterBlock(self, ctx: PascalParser.BlockContext):
         self.spaces += 4
 
-    def exitElseStatement(self, ctx: PascalParser.ElseStatementContext):
+    def exitBlock(self, ctx: PascalParser.BlockContext):
+        self.spaces -= 4
+
+    def enterBlockBody(self, ctx: PascalParser.BlockBodyContext):
+        self.spaces += 4
+
+    def exitBlockBody(self, ctx: PascalParser.BlockBodyContext):
         self.spaces -= 4
 
     def _print_input(self, var, const=None):
@@ -103,4 +104,5 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         main(sys.argv[1])
     else:
-        main('test1.pas')
+        # main('test1.pas')
+        main('test2.pas')
