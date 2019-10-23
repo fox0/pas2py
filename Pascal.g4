@@ -22,7 +22,9 @@ statements:
     statement (SEMI statement)*;
 
 statement:
-      writelnReadln
+    writelnReadln
+    | readln
+    | writeln
     | block
     //| callFunction
     | assignmentStatement
@@ -33,6 +35,12 @@ writelnReadln:
     'writeln' LPAREN CONST_STR RPAREN SEMI
     'readln' LPAREN ID RPAREN;
 
+readln:
+    'readln' LPAREN identifierList RPAREN;
+
+writeln:
+    'writeln' LPAREN expression RPAREN;
+
 assignmentStatement:
     ID ASSIGN expression;
 
@@ -40,7 +48,7 @@ expression:
     (LPAREN expression RPAREN | CONST_INT | ID) (operators expression)*;
 
 operators:
-    EQUAL | NOT_EQUAL | LT | LE | GE | GT | DIV | PLUS | MINUS | STAR | SLASH;
+    EQUAL | NOT_EQUAL | LT | LE | GE | GT | DIV | MOD | PLUS | MINUS | STAR | SLASH;
 
 ifStatement:
     'if' expression 'then' statement ('else' statement)*;
@@ -69,8 +77,10 @@ LE: '<=';
 GE: '>=';
 GT: '>';
 
-DIV: '//';
 PLUS: '+';
 MINUS: '-';
 STAR: '*';
 SLASH: '/';
+
+DIV: '//';
+MOD: '%';

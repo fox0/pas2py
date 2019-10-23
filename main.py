@@ -26,31 +26,42 @@ class Listener(PascalListener):
         self.spaces -= 4
 
     def exitWritelnReadln(self, ctx: PascalParser.WritelnReadlnContext):
-        const = str(ctx.CONST_STR())
-        var = str(ctx.ID())
-        var_type = self._get_var_type(var)
-        if var_type:
-            self._print('{var} = {var_type}(input({const}))'.format(var=var, var_type=var_type, const=const))
-        else:
-            raise NotImplementedError
+        var = ctx.ID().getText()
+        const = ctx.CONST_STR().getText()
+        self._print_input(var, const)
+
+    def enterReadln(self, ctx: PascalParser.ReadlnContext):
+        for i in ctx.identifierList().getText().split(','):
+            self._print_input(i)
+
+    def exitWriteln(self, ctx: PascalParser.WritelnContext):
+        self._print('print({})'.format(ctx.expression().getText()))
 
     def exitAssignmentStatement(self, ctx: PascalParser.AssignmentStatementContext):
         var = ctx.ID().getText()
         expr = ctx.expression().getText()
         self._print('{var} = {expr}'.format(var=var, expr=expr))
 
-    def _print(self, line):
-        print(' ' * self.spaces, line, sep='')
+    def _print_input(self, var, const=None):
+        const = const or ''
+        var_type = self._get_var_type(var)
+        if var_type:
+            self._print('{var} = {var_type}(input({const}))'.format(var=var, var_type=var_type, const=const))
+        else:
+            raise NotImplementedError
 
     def _get_var_type(self, var):
         try:
             var_type = self.var_ls[var]
         except KeyError:
             raise ValueError('variable {} not defined'.format(var))
-        if var_type in ('integer',):
+        if var_type in ('integer', 'int64'):
             return 'int'
         else:
             raise NotImplementedError(var_type)
+
+    def _print(self, line):
+        print(' ' * self.spaces, line, sep='')
 
 
 def main(filename):
@@ -70,4 +81,4 @@ def main(filename):
 
 
 if __name__ == '__main__':
-    main('test5.pas')
+    main('test1.pas')
