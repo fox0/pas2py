@@ -109,4 +109,5 @@ if __name__ == '__main__':
     else:
         # main('test1.pas')
         # main('test2.pas')
-        main('test3.pas')
+        # main('test3.pas')
+        main('test5.pas')

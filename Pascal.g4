@@ -63,7 +63,7 @@ whileStatement:
     'while' expression 'do' (block|blockBody);
 
 blockBody:
-    statements;
+    statement;
 
 SEMI: ';';
 COLON: ':';
