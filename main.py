@@ -38,12 +38,15 @@ class Listener(PascalListener):
             self._print_input(i)
 
     def exitWriteln(self, ctx: PascalParser.WritelnContext):
-        self._print('print({})'.format(ctx.expression().getText()))
+        self._print('print({})'.format(ctx.expressions().getText()))
 
     def exitAssignmentStatement(self, ctx: PascalParser.AssignmentStatementContext):
         var = ctx.ID().getText()
         expr = ctx.expression().getText()
         self._print('{var} = {expr}'.format(var=var, expr=expr))
+
+    def enterWhileStatement(self, ctx: PascalParser.WhileStatementContext):
+        self._print('while {}:'.format(ctx.expression().getText()))
 
     def enterIfStatement(self, ctx: PascalParser.IfStatementContext):
         self._print('if {}:'.format(ctx.expression().getText()))
@@ -105,4 +108,5 @@ if __name__ == '__main__':
         main(sys.argv[1])
     else:
         # main('test1.pas')
-        main('test2.pas')
+        # main('test2.pas')
+        main('test3.pas')

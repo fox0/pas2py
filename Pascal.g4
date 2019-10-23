@@ -28,6 +28,7 @@ statement:
     | block
     | assignmentStatement
     | ifStatement
+    | whileStatement
     ;
 
 writelnReadln:
@@ -38,22 +39,28 @@ readln:
     'readln' LPAREN identifierList RPAREN;
 
 writeln:
-    'writeln' LPAREN expression RPAREN;
+    'writeln' LPAREN expressions RPAREN;
 
 assignmentStatement:
     ID ASSIGN expression;
 
+expressions:
+    expression (COMMA expression)*;
+
 expression:
-    (LPAREN expression RPAREN | CONST_INT | ID) (operators expression)*;
+    (LPAREN expression RPAREN | CONST_INT | CONST_STR | ID) (operators expression)*;
 
 operators:
     EQUAL | NOT_EQUAL | LT | LE | GE | GT | OR | AND | DIV | MOD | PLUS | MINUS | STAR | SLASH;
 
 ifStatement:
-    'if' expression 'then' (block|blockBody) elseStatement*;
+    'if' expression 'then' (block|blockBody) elseStatement?;
 
 elseStatement:
     'else' (block|blockBody);
+
+whileStatement:
+    'while' expression 'do' (block|blockBody);
 
 blockBody:
     statements;
