@@ -1,7 +1,7 @@
 # pascal2python
 Конвертер кода из паскаля в питон.
 
- sudo apt inslall antlr4
+ sudo apt install antlr4
  git clone https://github.com/fox0/pas2py.git
  cd pas2py
  virtualenv venv
