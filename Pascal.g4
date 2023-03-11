@@ -25,6 +25,7 @@ statement:
     writelnReadln
     | readln
     | writeln
+    | write
     | block
     | assignmentStatement
     | ifStatement
@@ -32,7 +33,7 @@ statement:
     ;
 
 writelnReadln:
-    ('writeln' | 'write') LPAREN CONST_STR RPAREN SEMI
+    'writeln' LPAREN CONST_STR RPAREN SEMI
     'readln' LPAREN ID RPAREN;
 
 readln:
@@ -40,6 +41,9 @@ readln:
 
 writeln:
     'writeln' LPAREN expressions RPAREN;
+
+write:
+    'write' LPAREN expressions RPAREN;
 
 assignmentStatement:
     ID ASSIGN expression;
