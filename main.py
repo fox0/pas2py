@@ -123,7 +123,7 @@ def main(text: str) -> str:
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('example: {} tests/test1.pas'.format(sys.argv[0]))
+        print('example: {} tests/001.pas'.format(sys.argv[0]))
         exit(1)
     with open(sys.argv[1]) as f:
         print(main(text=f.read()))
