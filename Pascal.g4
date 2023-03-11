@@ -13,14 +13,17 @@ identifierList:
     ID (COMMA ID)*;
 
 varType:
-    ('byte' | 'longint' | 'integer' | 'int64' | 'real' | 'string' | 'boolean');
+    'byte'
+    | 'longint'
+    | 'integer'
+    | 'int64'
+    | 'real'
+    | 'string'
+    | 'boolean'
+    ;
 
 blockStatement:
     'begin' statements SEMI? 'end';
-
-// нужно для правильных отступов в питоне
-fakeblockStatement:
-    statement;
 
 statements:
     statement (SEMI statement)*;
@@ -69,19 +72,28 @@ operators:
     EQUAL | NOT_EQUAL | LT | LE | GE | GT | OR | AND | DIV | MOD | PLUS | MINUS | STAR | SLASH;
 
 ifStatement:
-    'if' expression 'then' (blockStatement | fakeblockStatement) elseStatement?;
+    'if' expression 'then' blockOrFakeBlock elseStatement?;
 
 elseStatement:
-    'else' (blockStatement | fakeblockStatement);
+    'else' blockOrFakeBlock;
 
 whileStatement:
-    'while' expression 'do' (blockStatement | fakeblockStatement);
+    'while' expression 'do' blockOrFakeBlock;
 
 forStatement:
-    'for' ID ASSIGN expression 'to' expression 'do' (blockStatement | fakeblockStatement);
+    'for' ID ASSIGN expression 'to' expression 'do' blockOrFakeBlock;
 
 breakStatement:
     'break';
+
+blockOrFakeBlock:
+    blockStatement
+    | fakeblockStatement
+    ;
+
+// нужно для правильных отступов в питоне
+fakeblockStatement:
+    statement;
 
 SEMI: ';';
 COLON: ':';
