@@ -1,7 +1,7 @@
 grammar Pascal;
 
 program:
-    variableDeclarationPart block DOT;
+    variableDeclarationPart blockStatement DOT;
 
 variableDeclarationPart:
     'var' variableDeclaration (SEMI variableDeclaration)* SEMI;
@@ -13,23 +13,29 @@ identifierList:
     ID (COMMA ID)*;
 
 varType:
-    ('integer' | 'int64' | 'real');
+    ('byte' | 'longint' | 'integer' | 'int64' | 'real' | 'string' | 'boolean');
 
-block:
+blockStatement:
     'begin' statements SEMI? 'end';
+
+// нужно для правильных отступов в питоне
+fakeblockStatement:
+    statement;
 
 statements:
     statement (SEMI statement)*;
 
 statement:
-    writelnReadln
-    | readln
-    | writeln
-    | write
-    | block
+    blockStatement
     | assignmentStatement
     | ifStatement
     | whileStatement
+    | forStatement
+    | breakStatement
+    | writelnReadln
+    | readln
+    | writeln
+    | write
     ;
 
 writelnReadln:
@@ -52,22 +58,30 @@ expressions:
     expression (COMMA expression)*;
 
 expression:
-    (LPAREN expression RPAREN | CONST_INT | CONST_STR | ID) (operators expression)*;
+    ( LPAREN expression RPAREN
+    | CONST_INT
+    | CONST_STR
+    | ID
+    | ID LPAREND expression RPAREND
+    ) (operators expression)*;
 
 operators:
     EQUAL | NOT_EQUAL | LT | LE | GE | GT | OR | AND | DIV | MOD | PLUS | MINUS | STAR | SLASH;
 
 ifStatement:
-    'if' expression 'then' (block|blockBody) elseStatement?;
+    'if' expression 'then' (blockStatement | fakeblockStatement) elseStatement?;
 
 elseStatement:
-    'else' (block|blockBody);
+    'else' (blockStatement | fakeblockStatement);
 
 whileStatement:
-    'while' expression 'do' (block|blockBody);
+    'while' expression 'do' (blockStatement | fakeblockStatement);
 
-blockBody:
-    statement;
+forStatement:
+    'for' ID ASSIGN expression 'to' expression 'do' (blockStatement | fakeblockStatement);
+
+breakStatement:
+    'break';
 
 SEMI: ';';
 COLON: ':';
@@ -75,6 +89,9 @@ COMMA: ',';
 DOT: '.';
 LPAREN: '(';
 RPAREN: ')';
+LPAREND: '[';
+RPAREND: ']';
+
 ASSIGN: ':=';
 
 EQUAL: '=';

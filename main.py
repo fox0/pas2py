@@ -23,6 +23,15 @@ KEYWORDS = (
     'mod', 'div', 'or', 'and',
     'if', 'then', 'else', 'while', 'do',
 )
+TYPES = {
+    'byte': 'int',
+    'longint': 'int',
+    'integer': 'int',
+    'int64': 'int',
+    'real': 'float',
+    'string': 'str',
+    'boolean': 'bool',
+}
 
 
 # noinspection PyPep8Naming
@@ -38,6 +47,40 @@ class Listener(PascalListener):
         for i in ctx.identifierList().getText().split(','):
             self.var_ls[i] = var_type
 
+    def enterBlockStatement(self, ctx: PascalParser.BlockStatementContext):
+        self.spaces += 4
+
+    def exitBlockStatement(self, ctx: PascalParser.BlockStatementContext):
+        self.spaces -= 4
+
+    def enterFakeblockStatement(self, ctx: PascalParser.FakeblockStatementContext):
+        self.spaces += 4
+
+    def exitFakeblockStatement(self, ctx: PascalParser.FakeblockStatementContext):
+        self.spaces -= 4
+
+    def exitAssignmentStatement(self, ctx: PascalParser.AssignmentStatementContext):
+        var: str = ctx.ID().getText()
+        expr: str = ctx.expression().getText()
+        self._print(f'{var} = {expr}')
+
+    def enterWhileStatement(self, ctx: PascalParser.WhileStatementContext):
+        expr: str = ctx.expression().getText()
+        self._print(f'while {expr}:')
+
+    def enterForStatement(self, ctx: PascalParser.ForStatementContext):
+        raise NotImplementedError
+
+    def enterIfStatement(self, ctx: PascalParser.IfStatementContext):
+        expr: str = ctx.expression().getText()
+        self._print(f'if {expr}:')
+
+    def enterElseStatement(self, ctx: PascalParser.ElseStatementContext):
+        self._print('else:')
+
+    def exitBreakStatement(self, ctx: PascalParser.BreakStatementContext):
+        self._print('break')
+
     def exitWritelnReadln(self, ctx: PascalParser.WritelnReadlnContext):
         var: str = ctx.ID().getText()
         const: str = ctx.CONST_STR().getText()
@@ -48,44 +91,19 @@ class Listener(PascalListener):
             self._print_input(i)
 
     def exitWriteln(self, ctx: PascalParser.WritelnContext):
-        self._print('print({})'.format(ctx.expressions().getText()))
+        expr: str = ctx.expressions().getText()
+        self._print(f'print({expr})')
 
     def exitWrite(self, ctx: PascalParser.WritelnContext):
-        self._print('print({}, end="")'.format(ctx.expressions().getText()))
+        expr: str = ctx.expressions().getText()
+        self._print(f"print({expr}, end='')")
 
-    def exitAssignmentStatement(self, ctx: PascalParser.AssignmentStatementContext):
-        var: str = ctx.ID().getText()
-        expr: str = ctx.expression().getText()
-        self._print('{var} = {expr}'.format(var=var, expr=expr))
-
-    def enterWhileStatement(self, ctx: PascalParser.WhileStatementContext):
-        self._print('while {}:'.format(ctx.expression().getText()))
-
-    def enterIfStatement(self, ctx: PascalParser.IfStatementContext):
-        self._print('if {}:'.format(ctx.expression().getText()))
-
-    def enterElseStatement(self, ctx: PascalParser.ElseStatementContext):
-        self._print('else:')
-
-    def enterBlock(self, ctx: PascalParser.BlockContext):
-        self.spaces += 4
-
-    def exitBlock(self, ctx: PascalParser.BlockContext):
-        self.spaces -= 4
-
-    def enterBlockBody(self, ctx: PascalParser.BlockBodyContext):
-        self.spaces += 4
-
-    def exitBlockBody(self, ctx: PascalParser.BlockBodyContext):
-        self.spaces -= 4
-
-    def _print_input(self, var: str, const: str = None):
-        const = const or ''
+    def _print_input(self, var: str, const: str = ''):
         var_type = self._get_var_type(var)
-        if var_type:
-            self._print('{var} = {var_type}(input({const}))'.format(var=var, var_type=var_type, const=const))
+        if var_type == 'str':
+            self._print(f'{var} = input({const})')
         else:
-            raise NotImplementedError
+            self._print(f'{var} = {var_type}(input({const}))')
 
     def _print(self, line: str):
         print(' ' * self.spaces, line, sep='', file=self.file)
@@ -94,12 +112,8 @@ class Listener(PascalListener):
         try:
             var_type = self.var_ls[var]
         except KeyError:
-            raise ValueError('variable {} not defined'.format(var))
-        result = {
-            'integer': 'int',
-            'int64': 'int',
-            'real': 'float',
-        }.get(var_type)
+            raise ValueError(f'variable {var} not defined')
+        result = TYPES.get(var_type)
         if result is None:
             raise NotImplementedError(var_type)
         return result
@@ -109,6 +123,7 @@ def main(text: str) -> str:
     text = re.sub(r'\b({})\b'.format(r'|'.join(KEYWORDS)), lambda m: m.group().lower(), text, flags=re.IGNORECASE)
     text = text.replace('div', '//')
     text = text.replace('mod', '%')
+    # text = text.replace('<>', '!=')
     # text = text.replace('=', '==')
 
     lexer = PascalLexer(InputStream(text))
@@ -123,13 +138,13 @@ def main(text: str) -> str:
     text = listener.file.read()
     try:
         return black.format_str(text, mode=black.Mode())
-    except black.parsing.InvalidInput:
-        return text
+    except black.parsing.InvalidInput as e:
+        return f'{text}\n# error: {e}'
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('example: {} tests/001.pas'.format(sys.argv[0]))
+        print(f'example: {sys.argv[0]} tests/001.pas')
         exit(1)
     with open(sys.argv[1]) as f:
         print(main(text=f.read()))
