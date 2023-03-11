@@ -1,7 +1,7 @@
 grammar Pascal;
 
 program:
-    variableDeclarationPart blockStatement DOT;
+    ('program' ID SEMI)? variableDeclarationPart blockStatement DOT;
 
 variableDeclarationPart:
     'var' variableDeclaration (SEMI variableDeclaration)* SEMI;
