@@ -39,6 +39,7 @@ statement:
     | readln
     | writeln
     | write
+    | inc
     ;
 
 writelnReadln:
@@ -46,13 +47,16 @@ writelnReadln:
     'readln' LPAREN ID RPAREN;
 
 readln:
-    'readln' LPAREN identifierList RPAREN;
+    ('read' | 'readln') LPAREN identifierList RPAREN;
 
 writeln:
     'writeln' LPAREN expressions RPAREN;
 
 write:
     'write' LPAREN expressions RPAREN;
+
+inc:
+    'inc' LPAREN ID RPAREN;
 
 assignmentStatement:
     ID ASSIGN expression;
@@ -62,7 +66,7 @@ expressions:
 
 expression:
     ( LPAREN expression RPAREN
-    | CONST_INT
+    | MINUS? CONST_INT
     | CONST_STR
     | ID
     | ID LPAREND expression RPAREND

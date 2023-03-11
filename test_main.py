@@ -29,3 +29,8 @@ def test004():
 
 def test005_real():
     _compare('005_real')
+
+
+@pytest.mark.skip(reason="bug =")
+def test006_for():
+    _compare('006_for')
