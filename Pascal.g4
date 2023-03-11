@@ -13,7 +13,7 @@ identifierList:
     ID (COMMA ID)*;
 
 varType:
-    ('integer' | 'int64');
+    ('integer' | 'int64' | 'real');
 
 block:
     'begin' statements SEMI? 'end';
@@ -32,7 +32,7 @@ statement:
     ;
 
 writelnReadln:
-    'writeln' LPAREN CONST_STR RPAREN SEMI
+    ('writeln' | 'write') LPAREN CONST_STR RPAREN SEMI
     'readln' LPAREN ID RPAREN;
 
 readln:

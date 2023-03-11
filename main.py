@@ -1,6 +1,8 @@
+import io
 import re
 import sys
 
+import black
 from antlr4.InputStream import InputStream
 from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4.tree.Tree import ParseTreeWalker
@@ -9,8 +11,11 @@ from PascalLexer import PascalLexer
 from PascalListener import PascalListener
 from PascalParser import PascalParser
 
+if sys.version_info < (3, 7):
+    raise ValueError('version python < 3.7')
+
 KEYWORDS = (
-    'var', 'integer', 'int64',
+    'var', 'integer', 'int64', 'real',
     'begin', 'end',
     'readln', 'writeln',
     'mod', 'div', 'or', 'and',
@@ -18,19 +23,21 @@ KEYWORDS = (
 )
 
 
+# noinspection PyPep8Naming
 class Listener(PascalListener):
     def __init__(self):
-        self.var_ls = {}
+        self.var_ls: dict[str, str] = {}
         self.spaces = -4
+        self.file = io.StringIO()
 
     def exitVariableDeclaration(self, ctx: PascalParser.VariableDeclarationContext):
-        var_type = ctx.varType().getText()
+        var_type: str = ctx.varType().getText()
         for i in ctx.identifierList().getText().split(','):
             self.var_ls[i] = var_type
 
     def exitWritelnReadln(self, ctx: PascalParser.WritelnReadlnContext):
-        var = ctx.ID().getText()
-        const = ctx.CONST_STR().getText()
+        var: str = ctx.ID().getText()
+        const: str = ctx.CONST_STR().getText()
         self._print_input(var, const)
 
     def enterReadln(self, ctx: PascalParser.ReadlnContext):
@@ -41,8 +48,8 @@ class Listener(PascalListener):
         self._print('print({})'.format(ctx.expressions().getText()))
 
     def exitAssignmentStatement(self, ctx: PascalParser.AssignmentStatementContext):
-        var = ctx.ID().getText()
-        expr = ctx.expression().getText()
+        var: str = ctx.ID().getText()
+        expr: str = ctx.expression().getText()
         self._print('{var} = {expr}'.format(var=var, expr=expr))
 
     def enterWhileStatement(self, ctx: PascalParser.WhileStatementContext):
@@ -66,7 +73,7 @@ class Listener(PascalListener):
     def exitBlockBody(self, ctx: PascalParser.BlockBodyContext):
         self.spaces -= 4
 
-    def _print_input(self, var, const=None):
+    def _print_input(self, var: str, const: str = None):
         const = const or ''
         var_type = self._get_var_type(var)
         if var_type:
@@ -74,25 +81,29 @@ class Listener(PascalListener):
         else:
             raise NotImplementedError
 
-    def _get_var_type(self, var):
+    def _print(self, line: str):
+        print(' ' * self.spaces, line, sep='', file=self.file)
+
+    def _get_var_type(self, var: str):
         try:
             var_type = self.var_ls[var]
         except KeyError:
             raise ValueError('variable {} not defined'.format(var))
-        if var_type in ('integer', 'int64'):
-            return 'int'
-        else:
+        result = {
+            'integer': 'int',
+            'int64': 'int',
+            'real': 'float',
+        }.get(var_type)
+        if result is None:
             raise NotImplementedError(var_type)
-
-    def _print(self, line):
-        print(' ' * self.spaces, line, sep='')
+        return result
 
 
-def main(filename):
-    with open(filename) as f:
-        text = f.read()
+def main(text: str) -> str:
     text = re.sub(r'\b({})\b'.format(r'|'.join(KEYWORDS)), lambda m: m.group().lower(), text, flags=re.IGNORECASE)
-    text = text.replace('div', '//').replace('mod', '%')
+    text = text.replace('div', '//')
+    text = text.replace('mod', '%')
+    # text = text.replace('=', '==')
 
     lexer = PascalLexer(InputStream(text))
     stream = CommonTokenStream(lexer)
@@ -102,12 +113,17 @@ def main(filename):
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
 
+    listener.file.seek(0)
+    text = listener.file.read()
+    try:
+        return black.format_str(text, mode=black.Mode())
+    except black.parsing.InvalidInput:
+        return text
+
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
-    else:
-        # main('test1.pas')
-        # main('test2.pas')
-        # main('test3.pas')
-        main('test5.pas')
+    if len(sys.argv) != 2:
+        print('example: {} tests/test1.pas'.format(sys.argv[0]))
+        exit(1)
+    with open(sys.argv[1]) as f:
+        print(main(text=f.read()))
